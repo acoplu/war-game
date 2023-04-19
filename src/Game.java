@@ -1,7 +1,6 @@
 import javax.swing.*;
 import javax.swing.event.*;
 
-import java.awt.*;
 import java.awt.event.*;
 
 import java.util.ArrayList;
@@ -86,8 +85,16 @@ public class Game extends JFrame {
                     new Thread(enemyFireLeft).start();
                     fireDelay = 0;
                 }
+                for(int i=0; i<bullets.size(); i++) {
+                    if((bullets.get(i).type.equalsIgnoreCase("friend") || bullets.get(i).type.equalsIgnoreCase("aircraft")) && bullets.get(i).x == enemy.x && bullets.get(i).y == enemy.y) {
+                        enemy.isDead = true;
+                        enemies.remove(enemy);
+                        remove(enemy);
+                    }
+                }
             }
-            remove(enemy);
+            if(enemies.size()==0)
+                new GameFinish("Oyunu kazandınız");
         }
     }
 
@@ -155,8 +162,14 @@ public class Game extends JFrame {
                     new Thread(friendFireLeft).start();
                     fireDelay = 0;
                 }
+                for(int i=0; i<bullets.size(); i++) {
+                    if(bullets.get(i).type.equalsIgnoreCase("enemy") && bullets.get(i).x == friend.x && bullets.get(i).y == friend.y) {
+                        friend.isDead = true;
+                        friends.remove(friend);
+                        remove(friend);
+                    }
+                }
             }
-            remove(friend);
         }
     }
 
@@ -168,6 +181,16 @@ public class Game extends JFrame {
         public void run() {
             aircraft.setLocation(240,240);
             add(aircraft);
+
+            while(!aircraft.isDead) {
+                for(int i=0; i<bullets.size(); i++) {
+                    if(bullets.get(i).type.equalsIgnoreCase("enemy") && bullets.get(i).x == aircraft.x && bullets.get(i).y == aircraft.y) {
+                        aircraft.isDead = true;
+                        remove(aircraft);
+                    }
+                }
+            }
+            new GameFinish("Oyunu kaybettiniz");
         }
 
     }

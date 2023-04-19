@@ -7,7 +7,7 @@ public class Bullet extends JLabel implements Runnable{
     int x;
     int y;
     int direction; // 1 and -1
-    String type;
+    String type = "";
 
     public Bullet(int x, int y, int direction, String type) {
         super();
@@ -15,6 +15,7 @@ public class Bullet extends JLabel implements Runnable{
         this.x = x;
         this.y = y;
         this.direction = direction;
+        this.type = type;
         setSize(WIDTH,HEIGHT);
 
         if(type.equalsIgnoreCase("enemy"))
@@ -43,4 +44,9 @@ public class Bullet extends JLabel implements Runnable{
             }
         }
     }
+
+    public String toString() {
+        return ("X: "+x+" Y: "+y+" Type: "+type+" Direction: "+direction);
+    }
+
 }

@@ -4,8 +4,8 @@ public class Main{
 public static void main(String[] args) {
 		
 		
-		int num_enemies = 10;
-		int num_friends = 10;
+		int num_enemies = 1;
+		int num_friends = 1;
 		
 		Game g = new Game();
 		Game.Enemy[] enemies = new Game.Enemy[num_enemies]; 
