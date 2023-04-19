@@ -9,13 +9,12 @@ import java.util.Random;
 
 public class Game extends JFrame {
 
-    public static final int WIDTH = 50;
-    public static final int HEIGHT = 50;
-    public static final int DIMENSION = 10;
+    public static final int WIDTH = 500;
+    public static final int HEIGHT = 500;
 
     ArrayList<Player> friends = new ArrayList<>();
     ArrayList<Player> enemies = new ArrayList<>();
-    Player aircraft;
+    Player aircraft = new Player(240,240, "aircraft");
 
     Random generator = new Random();
 
@@ -23,53 +22,116 @@ public class Game extends JFrame {
         int move;
         int x;
         int y;
+        
         public Enemy() {
-            // Generate random int value from 1 to 50 (exclusive) - [1,50)
-            x = generator.nextInt(WIDTH-2);
-            y = generator.nextInt(HEIGHT-4);
+            boolean flag = true;
+            while(flag) {
+                x = generator.nextInt(WIDTH/10 - 2)*10;
+                y = generator.nextInt(HEIGHT/10 - 4)*10;
+
+                if(noPlayerThere(x,y))
+                    flag = false;
+            }
+        }
+        
+        public void enemySleep(int millis) {
+            try {
+                Thread.sleep(millis);
+            } catch(InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         public void run() {
-            Player enemy = new Player(x*DIMENSION,y*DIMENSION, "enemy");
+            Player enemy = new Player(x,y, "enemy");
             enemy.setLocation(enemy.x, enemy.y);
             add(enemy);
             enemies.add(enemy);
-        }
 
+            while(!enemy.isDead) {
+                move = generator.nextInt(5);
+                if(move == 1 && enemy.y > 0 && noPlayerThere(enemy.x, enemy.y-10)) {
+                    enemy.setLocation(enemy.x,enemy.y-10);
+                    enemy.y -= 10;
+                    enemySleep(500);
+                } else if(move == 2 && enemy.y < (HEIGHT-50) && noPlayerThere(enemy.x, enemy.y+10)) {
+                    enemy.setLocation(enemy.x,enemy.y+10);
+                    enemy.y += 10;
+                    enemySleep(500);
+                } else if(move == 3 && enemy.x > 0 && noPlayerThere(enemy.x-10, enemy.y)) {
+                    enemy.setLocation(enemy.x-10,enemy.y);
+                    enemy.x -= 10;
+                    enemySleep(500);
+                } else if(move == 4 && enemy.x < (WIDTH-30) && noPlayerThere(enemy.x+10, enemy.y)) {
+                    enemy.setLocation(enemy.x+10,enemy.y);
+                    enemy.x += 10;
+                    enemySleep(500);
+                }
+            }
+            remove(enemy);
+        }
     }
 
     public class Friend extends Thread{
         int move;
         int x;
         int y;
+
         public Friend() {
-            // Generate random int value from 1 to 50 (exclusive) - [1,50)
-            x = generator.nextInt(WIDTH-2);
-            y = generator.nextInt(HEIGHT-4);
+            boolean flag = true;
+            while(flag) {
+                x = generator.nextInt(WIDTH/10 - 2)*10;
+                y = generator.nextInt(HEIGHT/10 - 4)*10;
+
+                if(noPlayerThere(x,y))
+                    flag = false;
+            }
+        }
+
+        public void friendSleep(int millis) {
+            try {
+                Thread.sleep(millis);
+            } catch(InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         public void run() {
-            Player friend = new Player(x*DIMENSION,y*DIMENSION, "friend");
+            Player friend = new Player(x,y, "friend");
             friend.setLocation(friend.x, friend.y);
             friends.add(friend);
             add(friend);
 
-            Bullet bull1 = new Bullet(friend.x+10,friend.y,1);
-            Bullet bull2 = new Bullet(friend.x-10,friend.y,-1);
-            add(bull1);
-            add(bull2);
-            new Thread(bull1).start();
-            new Thread(bull2).start();
+            while(!friend.isDead) {
+                move = generator.nextInt(5);
+                if(move == 1 && friend.y > 0 && noPlayerThere(friend.x, friend.y-10)) {
+                    friend.setLocation(friend.x,friend.y-10);
+                    friend.y -= 10;
+                    friendSleep(500);
+                } else if(move == 2 && friend.y < (HEIGHT-50) && noPlayerThere(friend.x, friend.y+10)) {
+                    friend.setLocation(friend.x,friend.y+10);
+                    friend.y += 10;
+                    friendSleep(500);
+                } else if(move == 3 && friend.x > 0 && noPlayerThere(friend.x-10, friend.y)) {
+                    friend.setLocation(friend.x-10,friend.y);
+                    friend.x -= 10;
+                    friendSleep(500);
+                } else if(move == 4 && friend.x < (WIDTH-30) && noPlayerThere(friend.x+10, friend.y)) {
+                    friend.setLocation(friend.x+10,friend.y);
+                    friend.x += 10;
+                    friendSleep(500);
+                }
+            }
+            remove(friend);
         }
-
     }
 
     public class AirCraft extends Thread {
         int move;
         int x;
         int y;
+
         public void run() {
-            Game.this.aircraft = new Player(240,240, "aircraft");
             aircraft.setLocation(240,240);
             add(aircraft);
         }
@@ -77,29 +139,46 @@ public class Game extends JFrame {
     }
 
     private void moveAircraft(String to) {
-        if(to.equalsIgnoreCase("up") && aircraft.getY() > 0) {
+        if(to.equalsIgnoreCase("up") && aircraft.y > 0 && noPlayerThere(aircraft.x, aircraft.y-10)) {
             aircraft.setLocation(aircraft.x,aircraft.y-10);
             aircraft.y -= 10;
-        } else if(to.equalsIgnoreCase("down") && aircraft.getY() < HEIGHT*DIMENSION) {
+        } else if(to.equalsIgnoreCase("down") && aircraft.y < (HEIGHT-50) && noPlayerThere(aircraft.x, aircraft.y+10)) {
             aircraft.setLocation(aircraft.x,aircraft.y+10);
             aircraft.y += 10;
-        } else if(to.equalsIgnoreCase("left") && aircraft.getX() > 0) {
+        } else if(to.equalsIgnoreCase("left") && aircraft.x > 0 && noPlayerThere(aircraft.x-10, aircraft.y)) {
             aircraft.setLocation(aircraft.x-10,aircraft.y);
             aircraft.x -= 10;
-        } else if(to.equalsIgnoreCase("right") && aircraft.getX() < WIDTH*DIMENSION) {
+        } else if(to.equalsIgnoreCase("right") && aircraft.x < (WIDTH-30) && noPlayerThere(aircraft.x+10, aircraft.y)) {
             aircraft.setLocation(aircraft.x+10,aircraft.y);
             aircraft.x += 10;
         }
     }
 
     private void aircraftFire() {
-        Bullet aircraftFireRight = new Bullet(aircraft.x, aircraft.y, 1);
-        Bullet aircraftFireLeft = new Bullet(aircraft.x, aircraft.y, -1);
+        Bullet aircraftFireRight = new Bullet(aircraft.x, aircraft.y, 1, "aircraft");
+        Bullet aircraftFireLeft = new Bullet(aircraft.x, aircraft.y, -1, "aircraft");
         add(aircraftFireRight);
         add(aircraftFireLeft);
 
         new Thread(aircraftFireRight).start();
         new Thread(aircraftFireLeft).start();
+    }
+
+    private boolean noPlayerThere(int x, int y) {
+        for(Player enemy: enemies) {
+            if(enemy.x == x && enemy.y == y)
+                return false;
+        }
+
+        for(Player friend: friends) {
+            if(friend.x == x && friend.y == y)
+                return false;
+        }
+
+        if(x == aircraft.x && y == aircraft.y)
+            return false;
+
+        return true;
     }
 
     private class KeyActivities implements KeyListener {
@@ -110,7 +189,6 @@ public class Game extends JFrame {
             if(e.getKeyCode() == KeyEvent.VK_LEFT) {
                 moveAircraft("left");
             } else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                System.out.println("left");
                 moveAircraft("right");
             } else if(e.getKeyCode() == KeyEvent.VK_UP) {
                 moveAircraft("up");
@@ -149,7 +227,7 @@ public class Game extends JFrame {
     public Game() {
         super(); // default
 
-        setSize(WIDTH*DIMENSION, HEIGHT*DIMENSION);
+        setSize(WIDTH, HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 

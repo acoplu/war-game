@@ -1,14 +1,15 @@
-import javax.swing.JPanel;
+import javax.swing.JLabel;
 import java.awt.Color;
-public class Bullet extends JPanel implements Runnable{
+public class Bullet extends JLabel implements Runnable{
     public static final int WIDTH=10;
     public static final int HEIGHT=10;
 
     int x;
     int y;
     int direction; // 1 and -1
+    String type;
 
-    public Bullet(int x, int y, int direction) {
+    public Bullet(int x, int y, int direction, String type) {
         super();
 
         this.x = x;
@@ -16,7 +17,13 @@ public class Bullet extends JPanel implements Runnable{
         this.direction = direction;
         setSize(WIDTH,HEIGHT);
 
-        setBackground(Color.ORANGE);
+        if(type.equalsIgnoreCase("enemy"))
+            setBackground(Color.BLUE);
+        else if(type.equalsIgnoreCase("friend"))
+            setBackground(Color.MAGENTA);
+        else if(type.equalsIgnoreCase("aircraft"))
+            setBackground(Color.ORANGE);
+
         setOpaque(true);
     }
 
