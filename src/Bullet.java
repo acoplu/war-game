@@ -1,8 +1,8 @@
 import javax.swing.JLabel;
 import java.awt.Color;
 public class Bullet extends JLabel implements Runnable{
-    public static final int WIDTH=10;
-    public static final int HEIGHT=10;
+    public static final int WIDTH=5;
+    public static final int HEIGHT=5;
 
     int x;
     int y;
