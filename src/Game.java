@@ -7,8 +7,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-
-
 public class Game extends JFrame {
 
     public static final int WIDTH = 50;
@@ -28,7 +26,7 @@ public class Game extends JFrame {
         public Enemy() {
             // Generate random int value from 1 to 50 (exclusive) - [1,50)
             x = generator.nextInt(WIDTH-2);
-            y = generator.nextInt(HEIGHT-2);
+            y = generator.nextInt(HEIGHT-4);
         }
 
         public void run() {
@@ -47,7 +45,7 @@ public class Game extends JFrame {
         public Friend() {
             // Generate random int value from 1 to 50 (exclusive) - [1,50)
             x = generator.nextInt(WIDTH-2);
-            y = generator.nextInt(HEIGHT-2);
+            y = generator.nextInt(HEIGHT-4);
         }
 
         public void run() {
@@ -82,13 +80,13 @@ public class Game extends JFrame {
         if(to.equalsIgnoreCase("up") && aircraft.getY() > 0) {
             aircraft.setLocation(aircraft.x,aircraft.y-10);
             aircraft.y -= 10;
-        } else if(to.equalsIgnoreCase("down") && aircraft.getY() < 500) {
+        } else if(to.equalsIgnoreCase("down") && aircraft.getY() < HEIGHT*DIMENSION) {
             aircraft.setLocation(aircraft.x,aircraft.y+10);
             aircraft.y += 10;
         } else if(to.equalsIgnoreCase("left") && aircraft.getX() > 0) {
             aircraft.setLocation(aircraft.x-10,aircraft.y);
             aircraft.x -= 10;
-        } else if(to.equalsIgnoreCase("right") && aircraft.getX() < 500) {
+        } else if(to.equalsIgnoreCase("right") && aircraft.getX() < WIDTH*DIMENSION) {
             aircraft.setLocation(aircraft.x+10,aircraft.y);
             aircraft.x += 10;
         }
@@ -120,6 +118,7 @@ public class Game extends JFrame {
                 moveAircraft("down");
             }
         }
+
         @Override
         public void keyTyped(KeyEvent e) {}
         @Override

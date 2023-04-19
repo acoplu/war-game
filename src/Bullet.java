@@ -21,7 +21,7 @@ public class Bullet extends JPanel implements Runnable{
     }
 
     public void run() {
-        while(true) {
+        while(x>-10 && y>-10 && x<550 && y<550) {
             try {
                 Thread.sleep(100);
             } catch(InterruptedException e) {
