@@ -1,10 +1,13 @@
 import javax.swing.*;
+import javax.swing.event.*;
+
 import java.awt.*;
 import java.awt.event.*;
+
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.swing.event.MouseInputListener;
+
 
 public class Game extends JFrame {
 
@@ -91,13 +94,22 @@ public class Game extends JFrame {
         }
     }
 
+    private void aircraftFire() {
+        Bullet aircraftFireRight = new Bullet(aircraft.x, aircraft.y, 1);
+        Bullet aircraftFireLeft = new Bullet(aircraft.x, aircraft.y, -1);
+        add(aircraftFireRight);
+        add(aircraftFireLeft);
+
+        new Thread(aircraftFireRight).start();
+        new Thread(aircraftFireLeft).start();
+    }
+
     private class KeyActivities implements KeyListener {
 
         @Override
         public void keyPressed(KeyEvent e) {
 
             if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-                System.out.println("left");
                 moveAircraft("left");
             } else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 System.out.println("left");
@@ -114,6 +126,27 @@ public class Game extends JFrame {
         public void keyReleased(KeyEvent e) {}
     }
 
+    private class MouseActivities implements MouseInputListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            aircraftFire();
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {}
+        @Override
+        public void mouseReleased(MouseEvent e) {}
+        @Override
+        public void mouseEntered(MouseEvent e) {}
+        @Override
+        public void mouseExited(MouseEvent e) {}
+        @Override
+        public void mouseDragged(MouseEvent e) {}
+        @Override
+        public void mouseMoved(MouseEvent e) {}
+    }
+
     public Game() {
         super(); // default
 
@@ -122,6 +155,8 @@ public class Game extends JFrame {
         setResizable(false);
 
         addKeyListener(new KeyActivities());
+        addMouseListener(new MouseActivities());
+        addMouseMotionListener(new MouseActivities());
 
         setVisible(true);
     }
