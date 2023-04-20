@@ -19,8 +19,6 @@ public class Game extends JFrame {
 
     Random generator = new Random();
 
-    boolean gameFinished = false;
-
     public class Enemy extends Thread{
         int move;
         int fireDelay = 0;
@@ -73,8 +71,8 @@ public class Game extends JFrame {
                     enemySleep();
                 }
                 if(fireDelay == 2) {
-                    Bullet enemyFireRight = new Bullet(enemy.x, enemy.y, 1, "enemy");
-                    Bullet enemyFireLeft = new Bullet(enemy.x, enemy.y, -1, "enemy");
+                    Bullet enemyFireRight = new Bullet(enemy.x+10, enemy.y, 1, "enemy");
+                    Bullet enemyFireLeft = new Bullet(enemy.x-10, enemy.y, -1, "enemy");
 
                     bullets.add(enemyFireRight);
                     bullets.add(enemyFireLeft);
@@ -86,10 +84,12 @@ public class Game extends JFrame {
                     fireDelay = 0;
                 }
                 for(int i=0; i<bullets.size(); i++) {
-                    if((bullets.get(i).type.equalsIgnoreCase("friend") || bullets.get(i).type.equalsIgnoreCase("aircraft")) && bullets.get(i).x == enemy.x && bullets.get(i).y == enemy.y) {
-                        enemy.isDead = true;
-                        enemies.remove(enemy);
-                        remove(enemy);
+                    if(bullets.get(i).x == enemy.x && bullets.get(i).y == enemy.y) {
+                        if(bullets.get(i).type.equalsIgnoreCase("friend") || bullets.get(i).type.equalsIgnoreCase("aircraft")) {
+                            enemy.isDead = true;
+                            enemies.remove(enemy);
+                            remove(enemy);
+                        }
                     }
                 }
             }
@@ -150,8 +150,8 @@ public class Game extends JFrame {
                     friendSleep();
                 }
                 if(fireDelay == 2) {
-                    Bullet friendFireRight = new Bullet(friend.x, friend.y, 1, "friend");
-                    Bullet friendFireLeft = new Bullet(friend.x, friend.y, -1, "friend");
+                    Bullet friendFireRight = new Bullet(friend.x+10, friend.y, 1, "friend");
+                    Bullet friendFireLeft = new Bullet(friend.x-10, friend.y, -1, "friend");
 
                     bullets.add(friendFireRight);
                     bullets.add(friendFireLeft);
@@ -163,10 +163,12 @@ public class Game extends JFrame {
                     fireDelay = 0;
                 }
                 for(int i=0; i<bullets.size(); i++) {
-                    if(bullets.get(i).type.equalsIgnoreCase("enemy") && bullets.get(i).x == friend.x && bullets.get(i).y == friend.y) {
-                        friend.isDead = true;
-                        friends.remove(friend);
-                        remove(friend);
+                    if(bullets.get(i).x == friend.x && bullets.get(i).y == friend.y) {
+                        if(bullets.get(i).type.equalsIgnoreCase("enemy")) {
+                            friend.isDead = true;
+                            friends.remove(friend);
+                            remove(friend);
+                        }
                     }
                 }
             }
@@ -174,9 +176,6 @@ public class Game extends JFrame {
     }
 
     public class AirCraft extends Thread {
-        int move;
-        int x;
-        int y;
 
         public void run() {
             aircraft.setLocation(240,240);
@@ -184,9 +183,13 @@ public class Game extends JFrame {
 
             while(!aircraft.isDead) {
                 for(int i=0; i<bullets.size(); i++) {
-                    if(bullets.get(i).type.equalsIgnoreCase("enemy") && bullets.get(i).x == aircraft.x && bullets.get(i).y == aircraft.y) {
-                        aircraft.isDead = true;
-                        remove(aircraft);
+                    if(bullets.get(i).x == aircraft.x && bullets.get(i).y == aircraft.y) {
+                        if(bullets.get(i).type.equalsIgnoreCase("enemy")) {
+                            aircraft.isDead = true;
+                            remove(aircraft);
+                        }
+                        remove(bullets.get(i));
+                        bullets.remove(bullets.get(i));
                     }
                 }
             }
@@ -212,8 +215,8 @@ public class Game extends JFrame {
     }
 
     private void aircraftFire() {
-        Bullet aircraftFireRight = new Bullet(aircraft.x, aircraft.y, 1, "aircraft");
-        Bullet aircraftFireLeft = new Bullet(aircraft.x, aircraft.y, -1, "aircraft");
+        Bullet aircraftFireRight = new Bullet(aircraft.x+10, aircraft.y, 1, "aircraft");
+        Bullet aircraftFireLeft = new Bullet(aircraft.x-10, aircraft.y, -1, "aircraft");
 
         bullets.add(aircraftFireRight);
         bullets.add(aircraftFireLeft);
@@ -225,20 +228,17 @@ public class Game extends JFrame {
     }
 
     private boolean noPlayerThere(int x, int y) {
-        for(Player enemy: enemies) {
-            if(enemy.x == x && enemy.y == y)
+        for(int i=0; i<enemies.size(); i++) {
+            if(enemies.get(i).x == x && enemies.get(i).y == y)
                 return false;
         }
 
-        for(Player friend: friends) {
-            if(friend.x == x && friend.y == y)
+        for(int i=0; i<friends.size(); i++) {
+            if(friends.get(i).x == x && friends.get(i).y == y)
                 return false;
         }
 
-        if(x == aircraft.x && y == aircraft.y)
-            return false;
-
-        return true;
+        return x != aircraft.x || y != aircraft.y;
     }
 
     private class KeyActivities implements KeyListener {
@@ -289,9 +289,11 @@ public class Game extends JFrame {
 
         setSize(WIDTH, HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setResizable(false);
 
         addKeyListener(new KeyActivities());
+
         addMouseListener(new MouseActivities());
         addMouseMotionListener(new MouseActivities());
 
