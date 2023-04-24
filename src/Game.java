@@ -1,8 +1,10 @@
-import javax.swing.*;
-import javax.swing.event.*;
-
-import java.awt.event.*;
-
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.event.MouseInputListener;
+import java.awt.Color;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -14,8 +16,6 @@ public class Game extends JFrame {
     ArrayList<Player> friends = new ArrayList<>();
     ArrayList<Player> enemies = new ArrayList<>();
     Player aircraft = new Player(240,240, "aircraft");
-
-    ArrayList<Bullet> bullets = new ArrayList<>();
 
     Random generator = new Random();
 
@@ -74,23 +74,12 @@ public class Game extends JFrame {
                     Bullet enemyFireRight = new Bullet(enemy.x+10, enemy.y, 1, "enemy");
                     Bullet enemyFireLeft = new Bullet(enemy.x-10, enemy.y, -1, "enemy");
 
-                    bullets.add(enemyFireRight);
-                    bullets.add(enemyFireLeft);
                     add(enemyFireRight);
                     add(enemyFireLeft);
 
                     new Thread(enemyFireRight).start();
                     new Thread(enemyFireLeft).start();
                     fireDelay = 0;
-                }
-                for(int i=0; i<bullets.size(); i++) {
-                    if(bullets.get(i).x == enemy.x && bullets.get(i).y == enemy.y) {
-                        if(bullets.get(i).type.equalsIgnoreCase("friend") || bullets.get(i).type.equalsIgnoreCase("aircraft")) {
-                            enemy.isDead = true;
-                            enemies.remove(enemy);
-                            remove(enemy);
-                        }
-                    }
                 }
             }
             if(enemies.size()==0)
@@ -153,23 +142,12 @@ public class Game extends JFrame {
                     Bullet friendFireRight = new Bullet(friend.x+10, friend.y, 1, "friend");
                     Bullet friendFireLeft = new Bullet(friend.x-10, friend.y, -1, "friend");
 
-                    bullets.add(friendFireRight);
-                    bullets.add(friendFireLeft);
                     add(friendFireRight);
                     add(friendFireLeft);
 
                     new Thread(friendFireRight).start();
                     new Thread(friendFireLeft).start();
                     fireDelay = 0;
-                }
-                for(int i=0; i<bullets.size(); i++) {
-                    if(bullets.get(i).x == friend.x && bullets.get(i).y == friend.y) {
-                        if(bullets.get(i).type.equalsIgnoreCase("enemy")) {
-                            friend.isDead = true;
-                            friends.remove(friend);
-                            remove(friend);
-                        }
-                    }
                 }
             }
         }
@@ -180,22 +158,106 @@ public class Game extends JFrame {
         public void run() {
             aircraft.setLocation(240,240);
             add(aircraft);
+        }
 
-            while(!aircraft.isDead) {
-                for(int i=0; i<bullets.size(); i++) {
-                    if(bullets.get(i).x == aircraft.x && bullets.get(i).y == aircraft.y) {
-                        if(bullets.get(i).type.equalsIgnoreCase("enemy")) {
-                            aircraft.isDead = true;
-                            remove(aircraft);
+    }
+
+    public class Bullet extends JLabel implements Runnable{
+        public static final int WIDTH=5;
+        public static final int HEIGHT=5;
+
+        int x;
+        int y;
+        int direction; // 1 and -1
+        String type;
+
+        public Bullet(int x, int y, int direction, String type) {
+            super();
+
+            this.x = x;
+            this.y = y;
+            this.direction = direction;
+            this.type = type;
+            setSize(WIDTH,HEIGHT);
+
+            if(type.equalsIgnoreCase("enemy"))
+                setBackground(Color.BLUE);
+            else if(type.equalsIgnoreCase("friend"))
+                setBackground(Color.MAGENTA);
+            else if(type.equalsIgnoreCase("aircraft"))
+                setBackground(Color.ORANGE);
+
+            setOpaque(true);
+        }
+
+        public void run() {
+            if(type.equalsIgnoreCase("friend") ||type.equalsIgnoreCase("aircraft"))
+                while(x>-10 && y>-10 && x<550 && y<550) {
+                    try {
+                        Thread.sleep(100);
+                    } catch(InterruptedException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    if(direction == 1) {
+                        setLocation(x+10,y);
+                        x += 10;
+                    } else if(direction == -1) {
+                        setLocation(x-10,y);
+                        x -= 10;
+                    }
+                    for(int i=0; i<enemies.size(); i++) {
+                        if (this.x == enemies.get(i).x && this.y == enemies.get(i).y) {
+                            enemies.get(i).isDead = true;
+                            Game.this.remove(enemies.get(i));
+                            enemies.remove(enemies.get(i));
+                            Game.this.remove(this);
                         }
-                        remove(bullets.get(i));
-                        bullets.remove(bullets.get(i));
+                    }
+                    for(int i=0; i<friends.size(); i++) {
+                        if (friends.get(i).x == x && friends.get(i).y == y) {
+                            Game.this.remove(this);
+                        }
+                    }
+                    if (x==aircraft.x && y == aircraft.y) {
+                        Game.this.remove(this);
+                    }
+                }
+            else if(type.equalsIgnoreCase("enemy")) {
+                while(x>-10 && y>-10 && x<550 && y<550) {
+                    try {
+                        Thread.sleep(100);
+                    } catch(InterruptedException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    if(direction == 1) {
+                        setLocation(x+10,y);
+                        x += 10;
+                    } else if(direction == -1) {
+                        setLocation(x-10,y);
+                        x -= 10;
+                    }
+                    if (x==aircraft.x && y == aircraft.y) {
+                        aircraft.isDead = true;
+                        Game.this.remove(aircraft);
+                        Game.this.remove(this);
+                        new GameFinish("Oyunu kaybettiniz");
+                    }
+                    for(int i=0; i<friends.size(); i++) {
+                        if (friends.get(i).x == x && friends.get(i).y == y) {
+                            friends.get(i).isDead = true;
+                            Game.this.remove(friends.get(i));
+                            friends.remove(friends.get(i));
+                            Game.this.remove(this);
+                        }
+                    }
+                    for(int i=0; i<enemies.size(); i++) {
+                        if (this.x == enemies.get(i).x && this.y == enemies.get(i).y) {
+                            Game.this.remove(this);
+                        }
                     }
                 }
             }
-            new GameFinish("Oyunu kaybettiniz");
         }
-
     }
 
     private void moveAircraft(String to) {
@@ -218,8 +280,6 @@ public class Game extends JFrame {
         Bullet aircraftFireRight = new Bullet(aircraft.x+10, aircraft.y, 1, "aircraft");
         Bullet aircraftFireLeft = new Bullet(aircraft.x-10, aircraft.y, -1, "aircraft");
 
-        bullets.add(aircraftFireRight);
-        bullets.add(aircraftFireLeft);
         add(aircraftFireRight);
         add(aircraftFireLeft);
 
@@ -239,6 +299,23 @@ public class Game extends JFrame {
         }
 
         return x != aircraft.x || y != aircraft.y;
+    }
+
+    private int playerThere(int x, int y) {
+        for(int i=0; i<enemies.size(); i++) {
+            if(enemies.get(i).x == x && enemies.get(i).y == y)
+                return i;
+        }
+
+        for(int i=0; i<friends.size(); i++) {
+            if(friends.get(i).x == x && friends.get(i).y == y)
+                return i;
+        }
+
+        if(x == aircraft.x && y == aircraft.y)
+            return -1;
+
+        return -2;
     }
 
     private class KeyActivities implements KeyListener {
